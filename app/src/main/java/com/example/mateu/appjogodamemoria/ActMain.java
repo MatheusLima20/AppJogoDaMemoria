@@ -3,26 +3,27 @@ package com.example.mateu.appjogodamemoria;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import  android.support.v7.widget.GridLayout;
+import android.support.v7.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.mateu.appjogodamemoria.Tabuleiro.Tabuleiro;
+
+import java.util.Objects;
+
 public class ActMain extends AppCompatActivity {
+
+    private GridLayout grid;
+
+    private Tabuleiro tabuleiro;
 
     private TextView txtPlacar;
 
-    private final int TAM_TABULEIRO = 30;
+    private int posicaoImgViradas [];
 
-    private final int [] IMAGENS = {
-            R.drawable.et, R.drawable.goku, R.drawable.vampiro,
-            R.drawable.pena, R.drawable.teken3
-    };
+    private int contaClick;
 
-    private int imagensTabuleiro [];
-
-    private int plarcar;
-
-    private int countClicks;
+    private int placar;
 
 
     @Override
@@ -30,38 +31,65 @@ public class ActMain extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_main);
 
+        grid = (GridLayout) findViewById(R.id.gridLTabuleiro);
+
         inicializar();
 
     }
 
     private void inicializar(){
 
-        countClicks = 0;
+        tabuleiro = new Tabuleiro();
+
+        tabuleiro.iniciarTabuleiro();
+
+        posicaoImgViradas = new int [2];
+
+        contaClick = 0;
 
         txtPlacar = (TextView) findViewById(R.id.txtPlacar);
 
-        txtPlacar.setText(String.valueOf(countClicks));
+        txtPlacar.setText(String.valueOf(contaClick));
+
+        this.iniciarGrid();
 
     }
 
-    public void trocaImagem(View v){
+    public void trocaImagem(View v) {
 
-        countClicks++;
+        ImageView imgView = (ImageView) v;
 
-        txtPlacar.setText(String.valueOf(countClicks));
+        int posicao = Integer.parseInt(imgView.getTag().toString());
 
-        if(countClicks <= 2) {
+        imgView.setImageResource(tabuleiro.getImagem(posicao));
 
-            ImageView imgView = (ImageView) v;
+        posicaoImgViradas[contaClick] = posicao;
 
-            imgView.setImageResource((R.drawable.et));
+        txtPlacar.setText(String.valueOf(placar));
 
-        }else{
-            // Pausar por 2 segundos
+        contaClick++;
 
-            android.os.SystemClock.sleep(2000);
+        if (contaClick > 1) {
 
-            countClicks = 0;
+            boolean acertou = tabuleiro.getImagem(posicaoImgViradas[0]) == tabuleiro.getImagem(posicaoImgViradas[1]);
+
+            if (!acertou) {
+
+                android.os.SystemClock.sleep(500);
+
+                for (int i = 0; i < posicaoImgViradas.length; i++) {
+
+                    ImageView img = (ImageView) grid.getChildAt(posicaoImgViradas[i]);
+
+                    img.setImageResource(tabuleiro.imgPadrao);
+
+                }
+
+            }else{
+                placar += contaClick;
+            }
+
+            contaClick = 0;
 
         }
 
@@ -71,16 +99,6 @@ public class ActMain extends AppCompatActivity {
 
         this.inicializar();
 
-        GridLayout grid = (GridLayout) findViewById(R.id.gridLTabuleiro);
-
-        for(int i = 0; i < grid.getChildCount(); i++){
-
-            ImageView img = (ImageView) grid.getChildAt(i);
-
-            img.setImageResource(R.drawable.lampada);
-
-        }
-
     }
 
     public void sair(View view) {
@@ -88,4 +106,19 @@ public class ActMain extends AppCompatActivity {
         this.finish();
 
     }
+
+    private void iniciarGrid(){
+
+        for(int i = 0; i < grid.getChildCount(); i++){
+
+            ImageView img = (ImageView) grid.getChildAt(i);
+
+            img.setImageResource(tabuleiro.imgPadrao);
+
+            img.setTag(i);
+
+        }
+
+    }
+
 }
